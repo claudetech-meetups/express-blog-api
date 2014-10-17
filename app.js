@@ -1,12 +1,19 @@
-var express = require('express');
+var express  = require('express'),
+    mongoose = require('mongoose');
 
-var app = express();
+mongoose.connect('mongodb://localhost/blog_api');
 
-app.get('/', function (req, res) {
-  res.json({foo: "abc"});
+var db = mongoose.connection;
+
+db.on('error', function (err) {
+  console.warn("Could not connect to mongodb");
+  process.exit(1);
 });
 
-app.use('/posts',      require('./routes/posts'));
-app.use('/categories', require('./routes/categories'));
+db.once('open', function () {
+  var app = express();
+  app.use('/posts',      require('./routes/posts'));
+  app.use('/categories', require('./routes/categories'));
 
-app.listen(5000);
+  app.listen(5000);
+});
