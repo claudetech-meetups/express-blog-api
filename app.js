@@ -1,6 +1,7 @@
 var express    = require('express'),
     mongoose   = require('mongoose'),
     bodyParser = require('body-parser'),
+    cors       = require('cors'),
     db         = mongoose.connection;
 
 mongoose.connect('mongodb://localhost/blog_api');
@@ -13,6 +14,7 @@ db.on('error', function (err) {
 db.once('open', function () {
   var app = express();
   app.use(bodyParser.json());
+  app.use(cors());
   app.use(function (err, req, res, next) {
     if (err) res.status(500).json({error: err.message});
   });
