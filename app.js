@@ -4,37 +4,42 @@ var express    = require('express'),
     cors       = require('cors'),
     db         = mongoose.connection;
 
-mongoose.connect('mongodb://localhost/blog_api');
 
-db.on('error', function (err) {
-  console.warn("Could not connect to mongodb");
-  process.exit(1);
-});
+module.exports = function (config, callback) {
+  mongoose.connect(config.mongo_url);
 
-db.once('open', function () {
-  var app = express();
-  app.use(bodyParser.json());
-  app.use(cors());
-  app.use(function (err, req, res, next) {
-    if (err) res.status(500).json({error: err.message});
+  db.on('error', function (err) {
+    console.warn("Could not connect to mongodb");
+    process.exit(1);
   });
 
-  app.use('/posts',      require('./routes/posts'));
-  app.use('/categories', require('./routes/categories'));
+  db.once('open', function () {
+    var app = express();
+    app.use(bodyParser.json());
+    app.use(cors());
+    app.use(function (err, req, res, next) {
+      if (err) res.status(500).json({error: err.message});
+    });
 
-  app.listen(5000);
-});
+    app.use('/posts',      require('./routes/posts'));
+    app.use('/categories', require('./routes/categories'));
 
-var __options = mongoose.Schema.prototype.defaultOptions;
-mongoose.Schema.prototype.defaultOptions = function (options) {
-  options = __options.apply(this, arguments);
-  options.toJSON = options.toJSON || {
-    transform: function (doc, ret, options) {
-      ret.id = ret._id;
-      delete ret._id;
-      delete ret.__v;
-      return ret;
-    }
+    app.listen(5000, function () {
+      callback(app);
+    });
+  });
+
+  var __options = mongoose.Schema.prototype.defaultOptions;
+  mongoose.Schema.prototype.defaultOptions = function (options) {
+    options = __options.apply(this, arguments);
+    options.toJSON = options.toJSON || {
+      transform: function (doc, ret, options) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      }
+    };
+    return options;
   };
-  return options;
-};
+}
