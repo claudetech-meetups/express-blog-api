@@ -4,7 +4,7 @@ var postSchema = new mongoose.Schema({
   title: String,
   content: String,
   categoryId: mongoose.Schema.Types.ObjectId,
-  createdAt: Date
+  createdAt: {type: Date, default: Date.now}
 });
 
 module.exports = mongoose.model('Post', postSchema);
