@@ -5,7 +5,8 @@ var express  = require('express'),
 
 
 router.get('/', function (req, res) {
-  models.Post.find(function (err, posts) {
+  var query = req.query.category_id ? {categoryId: req.query.category_id} : {};
+  models.Post.find(query, function (err, posts) {
     if (err) return res.status(500).json({error: err.message});
     res.json(posts);
   });
