@@ -6,29 +6,6 @@ var express    = require('express'),
 
 
 module.exports = function (config, callback) {
-  mongoose.connect(config.mongo_url);
-
-  db.on('error', function (err) {
-    console.warn("Could not connect to mongodb");
-    process.exit(1);
-  });
-
-  db.once('open', function () {
-    var app = express();
-    app.use(bodyParser.json());
-    app.use(cors());
-    app.use(function (err, req, res, next) {
-      if (err) res.status(500).json({error: err.message});
-    });
-
-    app.use('/posts',      require('./routes/posts'));
-    app.use('/categories', require('./routes/categories'));
-
-    app.listen(5000, function () {
-      callback(app);
-    });
-  });
-
   var __options = mongoose.Schema.prototype.defaultOptions;
   mongoose.Schema.prototype.defaultOptions = function (options) {
     options = __options.apply(this, arguments);
@@ -42,4 +19,26 @@ module.exports = function (config, callback) {
     };
     return options;
   };
-}
+
+  mongoose.connect(config.mongo_url);
+
+  db.on('error', function (err) {
+    console.warn("Could not connect to mongodb");
+    console.warn(err);
+    callback(err);
+  });
+
+  db.once('open', function () {
+    var app = express();
+    app.use(bodyParser.json());
+    app.use(cors());
+    app.use(function (err, req, res, next) {
+      if (err) res.status(500).json({error: err.message});
+    });
+
+    app.use('/posts',      require('./routes/posts'));
+    app.use('/categories', require('./routes/categories'));
+
+    callback(null, app);
+  });
+};
