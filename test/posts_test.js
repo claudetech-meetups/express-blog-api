@@ -33,17 +33,17 @@ describe('Posts', function () {
     });
 
     it('should return all posts', function (done) {
-      models.Post.create({title: "foo", content: "bar"}, function (err, post) {
+      models.Post.create({title: "foo", content: "bar"}, function (err, expected) {
         request(app)
         .get('/posts')
         .expect(200)
         .expect(function (res) {
           body = JSON.parse(res.text);
           expect(body.length).to.eq(1);
-          console.log(post._id)
-          var p = body[0];
-          console.log(p);
-          expect(p.id).to.eq(post._id.toString());
+          var post = body[0];
+          expect(post.id).to.eq(expected._id.toString());
+          expect(post.title).to.eq(expected.title);
+          expect(post.content).to.eq(expected.content);
         })
         .end(done);
       });
